@@ -335,6 +335,331 @@
       }
     }
   },
+  "PublicSG": {
+    "Type": "AWS::EC2::SecurityGroup",
+    "Properties": {
+      "VpcId": {
+        "Ref": "VPC"
+      },
+      "GroupDescription": "Allow HTTP and SSH traffic",
+      "SecurityGroupIngress": [
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 22,
+          "ToPort": 22,
+          "CidrIp": "0.0.0.0/0"
+        },
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 80,
+          "ToPort": 80,
+          "CidrIp": "0.0.0.0/0"
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "PublicSG"
+        }
+      ]
+    }
+  },
+  "PrivateSG": {
+    "Type": "AWS::EC2::SecurityGroup",
+    "Properties": {
+      "VpcId": {
+        "Ref": "VPC"
+      },
+      "GroupDescription": "Allow internal traffic",
+      "SecurityGroupIngress": [
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 0,
+          "ToPort": 65535,
+          "CidrIp": "10.0.0.0/16"
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "PrivateSG"
+        }
+      ]
+    }
+  },
+  "RDSInstance": {
+    "Type": "AWS::RDS::DBInstance",
+    "Properties": {
+      "DBInstanceClass": "db.t3.micro",
+      "AllocatedStorage": "20",
+      "DBName": "BusGPT_Db",
+      "Engine": "mysql",
+      "MasterUsername": "admin",
+      "MasterUserPassword": "P@ssword1234",
+      "VPCSecurityGroups": [
+        {
+          "Ref": "PrivateSG"
+        }
+      ],
+      "DBSubnetGroupName": {
+        "Ref": "DBSubnetGroup"
+      },
+      "StorageEncrypted": true,
+      "KmsKeyId": "arn:aws:kms:us-east-1:471112817312:key/30d9597f-33b4-400a-b5b9-61696ccc9745",
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "RDSInstance"
+        }
+      ]
+    }
+  },
+  "DBSubnetGroup": {
+    "Type": "AWS::RDS::DBSubnetGroup",
+    "Properties": {
+      "DBSubnetGroupDescription": "Subnet group for RDS instance",
+      "SubnetIds": [
+        {
+          "Ref": "PrivateSubnet1"
+        },
+        {
+          "Ref": "PrivateSubnet2"
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "DBSubnetGroup"
+        }
+      ]
+    }
+  },
+  "LambdaExecutionRole": {
+    "Type": "AWS::IAM::Role",
+    "Properties": {
+      "AssumeRolePolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "lambda.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "Policies": [
+        {
+          "PolicyName": "LambdaPolicy",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents",
+                  "lex:PostText",
+                  "ec2:CreateNetworkInterface",
+                  "ec2:DescribeNetworkInterfaces",
+                  "ec2:DeleteNetworkInterface"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "LambdaExecutionRole"
+        }
+      ]
+    }
+  },
+  "LexLambdaFunction": {
+    "Type": "AWS::Lambda::Function",
+    "Properties": {
+      "Handler": "index.handler",
+      "Role": {
+        "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]
+      },
+      "Code": {
+        "S3Bucket": "LamFuncBucket",
+        "S3Key": "lex_output.zip"
+      },
+      "Runtime": "python3.8",
+      "VpcConfig": {
+        "SubnetIds": [
+          {
+            "Ref": "PrivateSubnet1"
+          },
+          {
+            "Ref": "PrivateSubnet2"
+          }
+        ],
+        "SecurityGroupIds": [
+          {
+            "Ref": "PrivateSG"
+          }
+        ]
+      },
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "LexLambdaFunction"
+        }
+      ]
+    }
+  },
+  "LexServiceRole": {
+    "Type": "AWS::IAM::Role",
+    "Properties": {
+      "AssumeRolePolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "lex.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }
+        ]
+      },
+      "Policies": [
+        {
+          "PolicyName": "LexFullAccessPolicy",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "lex:*",
+                  "logs:CreateLogGroup",
+                  "logs:CreateLogStream",
+                  "logs:PutLogEvents"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "LexServiceRole"
+        }
+      ]
+    }
+  },
+  "GetBusArrivalIntent": {
+    "Type": "AWS::Lex::Intent",
+    "Properties": {
+      "Name": "GetBusArrivalTime",
+      "Description": "Intent to get bus arrival time",
+      "SampleUtterances": [
+        "When is the bus arriving at {BusStop}?",
+        "Is the bus arriving soon at {BusStop}?"
+      ],
+      "Slots": [
+        {
+          "Name": "BusStop",
+          "SlotType": "AMAZON.City",
+          "SlotConstraint": "Required",
+          "ValueElicitationPrompt": {
+            "Messages": [
+              {
+                "ContentType": "PlainText",
+                "Content": "Which bus stop you are finding the arrival time for?"
+              }
+            ],
+            "MaxAttempts": 2
+          }
+        }
+      ],
+      "FulfillmentActivity": {
+        "Type": "CodeHook",
+        "CodeHook": {
+          "MessageVersion": "1.0",
+          "Uri": {
+            "Fn::GetAtt": ["APILambdaFunction", "Arn"]
+          }
+        }
+      }
+    }
+  },
+  "BusGPT": {
+    "Type": "AWS::Lex::Bot",
+    "Properties": {
+      "Name": "BusGPT",
+      "Description": "Bot for checking bus arrival times",
+      "Intents": [
+        {
+          "IntentName": {
+            "Ref": "GetBusArrivalIntent"
+          },
+          "IntentVersion": "$LATEST"
+        }
+      ],
+      "Locale": "en-US",
+      "ChildDirected": false,
+      "IdleSessionTTLInSeconds": 300,
+      "RoleArn": {
+        "Fn::GetAtt": ["LexServiceRole", "Arn"]
+      }
+    }
+  },
+  "BusGPTAlias": {
+    "Type": "AWS::Lex::BotAlias",
+    "Properties": {
+      "Name": "BusGPTAlias",
+      "BotName": {
+        "Ref": "BusGPT"
+      },
+      "BotVersion": "$LATEST"
+    }
+  },
+  "APILambdaFunction": {
+    "Type": "AWS::Lambda::Function",
+    "Properties": {
+      "Handler": "index.handler",
+      "Role": {
+        "Fn::GetAtt": ["LambdaExecutionRole", "Arn"]
+      },
+      "Code": {
+        "S3Bucket": "LamFuncBucket",
+        "S3Key": "lta_dynamic_api.zip"
+      },
+      "Runtime": "python3.8",
+      "VpcConfig": {
+        "SubnetIds": [
+          {
+            "Ref": "PrivateSubnet1"
+          },
+          {
+            "Ref": "PrivateSubnet2"
+          }
+        ],
+        "SecurityGroupIds": [
+          {
+            "Ref": "PrivateSG"
+          }
+        ]
+      },
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "APILambdaFunction"
+        }
+      ]
+    }
+  },
   "Outputs": {
     "VPCId": {
       "Description": "VPC ID",

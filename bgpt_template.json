@@ -416,7 +416,7 @@
         ]
       }
     },
-    "BusGPTInstance": {
+    "BusGPTInstance1": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t3.micro",
@@ -441,7 +441,37 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "BusGPTInstance"
+            "Value": "BusGPTInstance1"
+          }
+        ]
+      }
+    },
+    "BusGPTInstance2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t3.micro",
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "AMI"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet2"
+        },
+        "KeyName": "BGPTKeyPair",
+        "SecurityGroupIds": [
+          {
+            "Ref": "PrivateSG"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "BusGPTInstance2"
           }
         ]
       }
@@ -534,9 +564,7 @@
               "Statement": [
                 {
                   "Effect": "Allow",
-                  "Action": [
-                    "lambda:InvokeFunction"
-                  ],
+                  "Action": ["lambda:InvokeFunction"],
                   "Resource": "*"
                 }
               ]
@@ -650,10 +678,16 @@
         "Ref": "PrivateSubnet2"
       }
     },
-    "BusGPTInstanceId": {
-      "Description": "BusGPT Instance ID",
+    "BusGPTInstance1Id": {
+      "Description": "BusGPT Instance 1 ID",
       "Value": {
-        "Ref": "BusGPTInstance"
+        "Ref": "BusGPTInstance1"
+      }
+    },
+    "BusGPTInstance2Id": {
+      "Description": "BusGPT Instance 2 ID",
+      "Value": {
+        "Ref": "BusGPTInstance2"
       }
     }
   }

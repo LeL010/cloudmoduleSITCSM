@@ -4,10 +4,12 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "AZs": ["us-east-1a", "us-east-1b"]
+        "AZs": ["us-east-1a", "us-east-1b"],
+        "AMI": "ami-0b0dcb5067f052a63"
       },
       "us-west-2": {
-        "AZs": ["us-west-2a", "us-west-2b"]
+        "AZs": ["us-west-2a", "us-west-2b"],
+        "AMI": "ami-0b0dcb5067f052a63"
       }
     }
   },
@@ -214,52 +216,6 @@
         }
       }
     },
-    "NatEIP1": {
-      "Type": "AWS::EC2::EIP",
-      "Properties": {
-        "Domain": "vpc"
-      }
-    },
-    "NatEIP2": {
-      "Type": "AWS::EC2::EIP",
-      "Properties": {
-        "Domain": "vpc"
-      }
-    },
-    "NatGateway1": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": ["NatEIP1", "AllocationId"]
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet1"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "NatGateway1"
-          }
-        ]
-      }
-    },
-    "NatGateway2": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": ["NatEIP2", "AllocationId"]
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet2"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "NatGateway2"
-          }
-        ]
-      }
-    },
     "PrivateRouteTable1": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
@@ -295,8 +251,8 @@
           "Ref": "PrivateRouteTable1"
         },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {
-          "Ref": "NatGateway1"
+        "InstanceId": {
+          "Ref": "NatInstance1"
         }
       }
     },
@@ -307,8 +263,8 @@
           "Ref": "PrivateRouteTable2"
         },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {
-          "Ref": "NatGateway2"
+        "InstanceId": {
+          "Ref": "NatInstance2"
         }
       }
     },
@@ -354,6 +310,18 @@
           "FromPort": 80,
           "ToPort": 80,
           "CidrIp": "0.0.0.0/0"
+        },
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 443,
+          "ToPort": 443,
+          "CidrIp": "0.0.0.0/0"
+        },
+        {
+          "IpProtocol": "tcp",
+          "FromPort": 1024,
+          "ToPort": 65535,
+          "CidrIp": "0.0.0.0/0"
         }
       ],
       "Tags": [
@@ -383,6 +351,68 @@
         {
           "Key": "Name",
           "Value": "PrivateSG"
+        }
+      ]
+    }
+  },
+  "NatInstance1": {
+    "Type": "AWS::EC2::Instance",
+    "Properties": {
+      "InstanceType": "t3.micro",
+      "SourceDestCheck": "false",
+      "ImageId": {
+        "Fn::FindInMap": [
+          "RegionMap",
+          {
+            "Ref": "AWS::Region"
+          },
+          "AMI"
+        ]
+      },
+      "SubnetId": {
+        "Ref": "PublicSubnet1"
+      },
+      "KeyName": "BGPTKeyPair",
+      "SecurityGroupIds": [
+        {
+          "Ref": "PublicSG"
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "NatInstance1"
+        }
+      ]
+    }
+  },
+  "NatInstance2": {
+    "Type": "AWS::EC2::Instance",
+    "Properties": {
+      "InstanceType": "t3.micro",
+      "SourceDestCheck": "false",
+      "ImageId": {
+        "Fn::FindInMap": [
+          "RegionMap",
+          {
+            "Ref": "AWS::Region"
+          },
+          "AMI"
+        ]
+      },
+      "SubnetId": {
+        "Ref": "PublicSubnet2"
+      },
+      "KeyName": "BGPTKeyPair",
+      "SecurityGroupIds": [
+        {
+          "Ref": "PublicSG"
+        }
+      ],
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "NatInstance2"
         }
       ]
     }
@@ -548,6 +578,20 @@
               }
             ]
           }
+        },
+        {
+          "PolicyName": "Lex_Lambda_Policy",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "VisualEditor0",
+                "Effect": "Allow",
+                "Action": ["lambda:InvokeFunction"],
+                "Resource": "arn:aws:lambda:us-east-1:471112817312:function:busgpt_lambda_handler"
+              }
+            ]
+          }
         }
       ],
       "Tags": [
@@ -689,18 +733,6 @@
       "Description": "Private Subnet 2 ID",
       "Value": {
         "Ref": "PrivateSubnet2"
-      }
-    },
-    "NatGateway1Id": {
-      "Description": "NAT Gateway 1 ID",
-      "Value": {
-        "Ref": "NatGateway1"
-      }
-    },
-    "NatGateway2Id": {
-      "Description": "NAT Gateway 2 ID",
-      "Value": {
-        "Ref": "NatGateway2"
       }
     }
   }

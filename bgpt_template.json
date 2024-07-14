@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "VPC with 2 AZs, each with 1 public and 1 private subnet, NAT Gateways in public subnets, and an RDS instance. Includes a Lex bot for checking bus arrival times.",
+  "Description": "VPC with 2 AZs, each with 1 public and 1 private subnet, NAT Gateways in public subnets, an RDS instance, and an EC2 instance for hosting a Python web app. Includes a Lex bot for checking bus arrival times.",
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
@@ -416,6 +416,36 @@
         ]
       }
     },
+    "BusGPTInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "InstanceType": "t3.micro",
+        "ImageId": {
+          "Fn::FindInMap": [
+            "RegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "AMI"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet1"
+        },
+        "KeyName": "BGPTKeyPair",
+        "SecurityGroupIds": [
+          {
+            "Ref": "PrivateSG"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "BusGPTInstance"
+          }
+        ]
+      }
+    },
     "RDSInstance": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
@@ -491,6 +521,21 @@
                     "logs:CreateLogGroup",
                     "logs:CreateLogStream",
                     "logs:PutLogEvents"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "Lex_Lambda_Policy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
                   ],
                   "Resource": "*"
                 }
@@ -603,6 +648,12 @@
       "Description": "Private Subnet 2 ID",
       "Value": {
         "Ref": "PrivateSubnet2"
+      }
+    },
+    "BusGPTInstanceId": {
+      "Description": "BusGPT Instance ID",
+      "Value": {
+        "Ref": "BusGPTInstance"
       }
     }
   }

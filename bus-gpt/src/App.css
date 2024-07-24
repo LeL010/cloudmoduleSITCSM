@@ -1,0 +1,53 @@
+/* Apply the black background with white font theme globally */
+
+html, body {
+  background-color: #000000; /* Black background for the whole page */
+  color: #ffffff; /* White text color */
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.navbar.is-primary {
+  background-color: #ffd700; /* Yellow navbar */
+  color: #000000; /* Black text in the navbar */
+}
+
+.navbar-item {
+  color: #000000; /* Black text for navbar items */
+}
+
+.title, .label {
+  color: #ffd700; /* Yellow titles and labels */
+}
+
+.input, .textarea {
+  border-color: #ffd700; /* Yellow border */
+  color: #000000; /* Black text color for input and textarea */
+  background-color: #ffffff; /* White background for input and textarea */
+}
+
+.button.is-primary {
+  background-color: #ffd700; /* Yellow button */
+  color: #000000; /* Black text on button */
+}
+
+.button.is-primary:hover {
+  background-color: #e6c200; /* Darker yellow on hover */
+}
+
+.section {
+  background-color: #000000; /* Black background for sections */
+  padding: 20px;
+}
+
+.container {
+  background-color: #000000; /* Black background for containers */
+  padding: 20px;
+}
+
+/* Ensure the full height of the viewport is covered */
+html, body, #root {
+  min-height: 100%;
+}

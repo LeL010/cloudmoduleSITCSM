@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
+    <style>
+        body {
+            background-color: white;
+            color: yellow;
+        }
+        .navbar {
+            background-color: yellow;
+        }
+        .navbar-item, .title, .label, .button {
+            color: white !important;
+        }
+        .button.is-link {
+            background-color: yellow;
+            border-color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                Home
+            </a>
+            <a class="navbar-item" href="/contact_us">
+                Contact Us
+            </a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Welcome to Bus-GPT</h1>
+            <iframe
+                style="border: none;"
+                height="600px"
+                width="400px"
+                src="https://widget.kommunicate.io/chat?appId=2aba7cf041c4ba9aabeb083b46e91bd54"
+                allow="microphone; geolocation;"
+            >
+            </iframe>
+        </div>
+    </section>
+</body>
+</html>

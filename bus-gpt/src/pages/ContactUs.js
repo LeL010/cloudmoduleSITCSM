@@ -9,7 +9,7 @@ const ContactUs = () => {
     message: ''
   });
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,7 +35,7 @@ const ContactUs = () => {
         email: '',
         message: ''
       });
-      history.push('/contact-us');
+      navigate.push('/contact-us');
     } else {
       alert('Failed to send message.');
     }

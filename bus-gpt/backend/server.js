@@ -1,8 +1,8 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mysql = require('mysql2');
-const cors = require('cors');
-const path = require('path');
+import express from 'express';
+import bodyParser from 'body-parser';
+import mysql from 'mysql2';
+import cors from 'cors';
+import path from 'path';
 
 const app = express();
 const port = 5000;

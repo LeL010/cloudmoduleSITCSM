@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import KommunicateChat from './pages/Index';
-import ContactUs from './pages/ContactUs';
+import KommunicateChat from './pages/Index.js';
+import ContactUs from './pages/ContactUs.js';
 import 'bulma/css/bulma.min.css';
 import './App.css';
 

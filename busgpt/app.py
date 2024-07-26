@@ -4,7 +4,6 @@ from config import DB_CONFIG
 
 app = Flask(__name__)
 
-# Database connection
 def get_db_connection():
     return pymysql.connect(
         host=DB_CONFIG['host'],
@@ -37,4 +36,4 @@ def contact_us():
     return render_template('contact_us.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', port=8000)

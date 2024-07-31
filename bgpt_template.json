@@ -358,7 +358,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t3.micro",
-        "SourceDestCheck": "false",
+        "SourceDestCheck": false,
         "ImageId": {
           "Fn::FindInMap": [
             "RegionMap",
@@ -389,7 +389,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t3.micro",
-        "SourceDestCheck": "false",
+        "SourceDestCheck": false,
         "ImageId": {
           "Fn::FindInMap": [
             "RegionMap",
@@ -484,7 +484,7 @@
         "DBName": "BusGPT_Db",
         "Engine": "mysql",
         "MasterUsername": "admin",
-        "MasterUserPassword": "P@ssword1234",
+        "MasterUserPassword": "Password1234",
         "VPCSecurityGroups": [
           {
             "Ref": "PrivateSG"
@@ -577,73 +577,6 @@
             "Value": "LexServiceRole"
           }
         ]
-      }
-    },
-    "GetBusArrivalIntent": {
-      "Type": "AWS::Lex::Intent",
-      "Properties": {
-        "Name": "GetBusArrivalTime",
-        "Description": "Intent to get bus arrival time",
-        "SampleUtterances": [
-          "When is the bus arriving at {BusStop}?",
-          "Is the bus arriving soon at {BusStop}?"
-        ],
-        "Slots": [
-          {
-            "Name": "BusStop",
-            "SlotType": "AMAZON.City",
-            "SlotConstraint": "Required",
-            "ValueElicitationPrompt": {
-              "Messages": [
-                {
-                  "ContentType": "PlainText",
-                  "Content": "Which bus stop you are finding the arrival time for?"
-                }
-              ],
-              "MaxAttempts": 2
-            }
-          }
-        ],
-        "FulfillmentActivity": {
-          "Type": "CodeHook",
-          "CodeHook": {
-            "MessageVersion": "1.0",
-            "Uri": {
-              "Fn::GetAtt": ["APILambdaFunction", "Arn"]
-            }
-          }
-        }
-      }
-    },
-    "BusGPT": {
-      "Type": "AWS::Lex::Bot",
-      "Properties": {
-        "Name": "BusGPT",
-        "Description": "Bot for checking bus arrival times",
-        "Intents": [
-          {
-            "IntentName": {
-              "Ref": "GetBusArrivalIntent"
-            },
-            "IntentVersion": "$LATEST"
-          }
-        ],
-        "Locale": "en-US",
-        "ChildDirected": false,
-        "IdleSessionTTLInSeconds": 300,
-        "RoleArn": {
-          "Fn::GetAtt": ["LexServiceRole", "Arn"]
-        }
-      }
-    },
-    "BusGPTAlias": {
-      "Type": "AWS::Lex::BotAlias",
-      "Properties": {
-        "Name": "BusGPTAlias",
-        "BotName": {
-          "Ref": "BusGPT"
-        },
-        "BotVersion": "$LATEST"
       }
     }
   },

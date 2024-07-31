@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bulma.min.css') }}">
+    <style>
+        /* body {
+            background-color: white;
+            color: yellow;
+        }
+        .navbar {
+            background-color: yellow;
+        }
+        .navbar-item, .title, .label, .button {
+            color: white !important;
+        }
+        .button.is-link {
+            background-color: yellow;
+            border-color: white;
+        } */
+    </style>
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                Home
+            </a>
+            <a class="navbar-item" href="/contact_us">
+                Contact Us
+            </a>
+        </div>
+    </nav>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">Contact Us</h1>
+            <form method="POST">
+                <div class="field">
+                    <label class="label">Name</label>
+                    <div class="control">
+                        <input class="input" type="text" name="name" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control">
+                        <input class="input" type="email" name="email" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Message</label>
+                    <div class="control">
+                        <textarea class="textarea" name="message" required></textarea>
+                    </div>
+                </div>
+                <div class="control">
+                    <button class="button is-link" type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

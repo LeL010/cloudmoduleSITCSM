@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rds:DescribeDBInstances",
+        "rds:DescribeDBClusters",
+        "rds:DescribeDBSnapshots",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeDBParameterGroups",
+        "rds:DescribeDBSecurityGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "rds-data:BatchExecuteStatement",
+        "rds-data:ExecuteStatement",
+        "rds-data:RollbackTransaction",
+        "rds-data:BeginTransaction",
+        "rds-data:CommitTransaction"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

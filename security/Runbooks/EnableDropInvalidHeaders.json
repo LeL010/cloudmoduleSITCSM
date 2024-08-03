@@ -1,0 +1,34 @@
+{
+  "description": "Enables the drop of invalid HTTP headers for ALBs.",
+  "schemaVersion": "0.3",
+  "assumeRole": "arn:aws:iam::471112817312:role/AutomationAssumeRole",
+  "parameters": {
+    "LoadBalancerArn": {
+      "type": "String",
+      "description": "(Required) The ARN of the load balancer."
+    },
+    "AutomationAssumeRole": {
+      "type": "String",
+      "description": "(Optional) The ARN of the role that allows Automation to perform the actions on your behalf.",
+      "default": "arn:aws:iam::YOUR_ACCOUNT_ID:role/AutomationAssumeRole"
+    }
+  },
+  "mainSteps": [
+    {
+      "name": "EnableDropInvalidHeaders",
+      "action": "aws:executeAwsApi",
+      "isEnd": true,
+      "inputs": {
+        "Service": "elbv2",
+        "Api": "ModifyLoadBalancerAttributes",
+        "LoadBalancerArn": "{{LoadBalancerArn}}",
+        "Attributes": [
+          {
+            "Key": "routing.http.drop_invalid_header_fields.enabled",
+            "Value": "true"
+          }
+        ]
+      }
+    }
+  ]
+}
